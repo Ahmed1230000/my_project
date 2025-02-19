@@ -20,7 +20,7 @@ class UnitController extends Controller
     {
         try {
             $units = QueryBuilder::for(Unit::class)
-                ->allowedIncludes(['user', 'developer', 'location'])->get();
+                ->allowedIncludes(['user', 'developer', 'location', 'project'])->get();
             return UnitResource::collection($units);
         } catch (\Exception $e) {
             Log::error('Failed to retrieve units', ['error' => $e->getMessage()]);
@@ -35,18 +35,38 @@ class UnitController extends Controller
     {
         try {
             DB::beginTransaction();
+
+            // Create the unit
             $unit = Unit::create($request->validated());
-            if ($unit) {
-                DB::commit();
-                return response()->json([
-                    'message' => 'Unit created successfully',
-                    'data' => UnitResource::make($unit)
-                ], 201);
+
+            // Handle file uploads if present
+            if ($request->hasFile('photo')) {
+                $unit->addMultipleMediaFromRequest(['photo'])
+                    ->each(function ($photo) {
+                        $photo->toMediaCollection('unit_photo');
+                    });
             }
+
+            // Commit the transaction
+            DB::commit();
+
+            // Return success response
+            return response()->json([
+                'message' => 'Unit created successfully',
+                'data' => UnitResource::make($unit)
+            ], 201);
         } catch (\Exception $e) {
+            // Rollback the transaction in case of an error
             DB::rollBack();
+
+            // Log the error
             Log::error('Failed to create unit', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'Failed to create unit', 'error' => $e->getMessage()], 500);
+
+            // Return error response
+            return response()->json([
+                'message' => 'Failed to create unit',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -57,7 +77,7 @@ class UnitController extends Controller
     {
         try {
             $showUnit = QueryBuilder::for(Unit::where('id', $unit->id))
-                ->allowedIncludes(['user', 'developer', 'location'])->firstOrFail();
+                ->allowedIncludes(['user', 'developer', 'location', 'project'])->firstOrFail();
             return UnitResource::make($showUnit);
         } catch (\Exception $e) {
             Log::error('Failed to retrieve unit', ['error' => $e->getMessage()]);
@@ -72,16 +92,39 @@ class UnitController extends Controller
     {
         try {
             DB::beginTransaction();
+
+            // Update the unit
             $unit->update($request->validated());
+
+            // Handle file uploads if present
+            if ($request->hasFile('photo')) {
+                $unit->clearMediaCollection('unit_photo') // Clear existing media
+                    ->addMultipleMediaFromRequest(['photo'])
+                    ->each(function ($photo) {
+                        $photo->toMediaCollection('unit_photo');
+                    });
+            }
+
+            // Commit the transaction
             DB::commit();
+
+            // Return success response
             return response()->json([
                 'message' => 'Unit updated successfully',
                 'data' => UnitResource::make($unit)
             ], 200);
         } catch (\Exception $e) {
+            // Rollback the transaction in case of an error
             DB::rollBack();
+
+            // Log the error
             Log::error('Failed to update unit', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'Failed to update unit', 'error' => $e->getMessage()], 500);
+
+            // Return error response
+            return response()->json([
+                'message' => 'Failed to update unit',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 

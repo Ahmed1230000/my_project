@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class LoginFormRequest extends FormRequest
+class ProjectUpdateFormRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,8 +23,8 @@ class LoginFormRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email'        => ['required', 'string', 'email', 'max:255'],
-            'password'     => ['required', 'string'],
+            'name'        => ['required', 'string', 'max:255', Rule::unique('projects', 'name')->ignore($this->route('project'))],
+            'description' => ['nullable', 'string'],
         ];
     }
 }

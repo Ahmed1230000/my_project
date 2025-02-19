@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DeveloperController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\UnitAmenityController;
 use App\Http\Controllers\UnitController;
@@ -38,5 +39,6 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::delete('/', [UnitAmenityController::class, 'destroy']); // Detach amenities from a unit
     });
     Route::get('/amenities', [UnitAmenityController::class, 'index']); // List amenities of a unit
-    Route::apiResource('reservations', ReservationController::class);
+    Route::apiResource('/reservations', ReservationController::class);
+    Route::apiResource('/project', ProjectController::class);
 });

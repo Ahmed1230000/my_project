@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class unit extends Model
+class unit extends Model implements HasMedia
 {
-    use SoftDeletes;
+    use SoftDeletes, InteractsWithMedia;
     protected $table = 'units';
     protected $fillable = [
         'unit_type',
@@ -18,8 +20,9 @@ class unit extends Model
         'number_bathrooms',
         'expected_delivery_date',
         'location_id',
-        'user_id',
-        'developer_id'
+        'developer_id',
+        'project_id',
+        'user_id'
     ];
 
     protected $casts = [
@@ -51,5 +54,9 @@ class unit extends Model
     public function reservations()
     {
         return $this->hasMany(Reservation::class);
+    }
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
     }
 }

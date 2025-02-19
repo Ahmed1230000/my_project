@@ -28,6 +28,8 @@ class UnitResource extends JsonResource
             'user'                    => UserResource::make($this->whenLoaded('user')),
             'developer'               => DeveloperResource::make($this->whenLoaded('developer')),
             'location'                => LocationResource::make($this->whenLoaded('location')),
+            'project'                 => ProjectResource::make($this->whenLoaded('project')),
+            'media'                   => $this->getMedia('unit_photo')
         ];
     }
 }
